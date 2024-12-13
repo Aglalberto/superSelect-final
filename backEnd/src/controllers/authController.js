@@ -26,11 +26,11 @@ export const login = async (req, res) => {
    try {
       const user = await userModel.findUserByEmail(email);
       if (!user) {
-         return res.status(400).json({ message: "Usuário ou senha inválidos" });
+         return res.status(400).json({ message: "Email ou senha inválidos" });
       }
-      const isPassordValid = await bcrypt.compare(password, user.password);
-      if (!isPassordValid) {
-         return res.status(400).json({ message: "Usuário ou senha inválidos" });
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+         return res.status(400).json({ message: "Email ou senha inválidos" });
       }
       const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expires: '1h' });
       console.log(token);
