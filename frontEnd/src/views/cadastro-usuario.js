@@ -1,58 +1,59 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../services/authService';
 
-const Login = () => {
+const CadastroUsuario = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      navigate('/dashboard');
+      console.log('User Registered:', { name, email, password });
     } catch (err) {
-      setError('Login falhou. Verifique suas credenciais.');
+      setError('Cadastro falhou. Verifique suas informações.');
     }
   };
-
-function CadastroUsuario() {
 
   return (
     <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
       <h2>Cadastro Usuário</h2>
-      <form action='url/register' method='POST' onSubmit={handleSubmit}>
+      {error && <div style={{ color: 'red' }}>{error}</div>}
+      <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="nome">Nome:</label>
-          <input  
-            name='name'
+          <label htmlFor="name">Nome:</label>
+          <input
+            name="name"
             type="text"
             id="name"
             placeholder="Digite seu nome"
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
+            onChange={(e) => setName(e.target.value)} 
+            value={name}
             required
-            
           />
         </div>
         <div>
           <label htmlFor="email">E-mail:</label>
           <input
-            name='email'
+            name="email"
             type="email"
             id="email"
             placeholder="Digite seu e-mail"
+            onChange={(e) => setEmail(e.target.value)}
+            value={email}
+            required
           />
         </div>
         <div>
-          <label htmlFor="senha">Senha:</label>
+          <label htmlFor="password">Senha:</label>
           <input
-            name='password'
+            name="password"
             type="password"
-            id="senha"
+            id="password"
             placeholder="Digite sua senha"
+            onChange={(e) => setPassword(e.target.value)}
+            value={password}
+            required
           />
         </div>
         <button type="submit">Cadastrar</button>
