@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+
 
 const CadastroUsuario = () => {
   const [name, setName] = useState('');
@@ -6,20 +8,36 @@ const CadastroUsuario = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const [cadastrar, setCadastrar] = useState({
+    nome: '',
+    email: '',
+    senha: ''
+  });
+  const [erro, setErro] = useState('')
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      console.log('User Registered:', { name, email, password });
-    } catch (err) {
-      setError('Cadastro falhou. Verifique suas informações.');
-    }
+    axios.post('http://localhost:3000/register', cadastrar)
+      .then(response => {
+        console.log(response.data)
+        alert('Usuário Cadastrado com Sucesso!!!')
+        setCadastrar({
+          nome: '',
+          email: '',
+          senha: ''
+        })
+      })
+      .catch(error => {
+        console.error('Erro ao Cadastrar Usuário: ', error)
+        setErro(error.response.data)
+      })
   };
 
   return (
     <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
       <h2>Cadastro Usuário</h2>
       {error && <div style={{ color: 'red' }}>{error}</div>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} >
         <div>
           <label htmlFor="name">Nome:</label>
           <input
@@ -27,7 +45,7 @@ const CadastroUsuario = () => {
             type="text"
             id="name"
             placeholder="Digite seu nome"
-            onChange={(e) => setName(e.target.value)} 
+            onChange={(e) => setName(e.target.value)}
             value={name}
             required
           />
