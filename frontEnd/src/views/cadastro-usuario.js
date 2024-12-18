@@ -6,38 +6,38 @@ const CadastroUsuario = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
 
-  const [cadastrar, setCadastrar] = useState({
-    nome: '',
-    email: '',
-    senha: ''
-  });
   const [erro, setErro] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:3000/register', cadastrar)
+
+    // Atualiza o objeto `cadastrar` com os valores dos inputs
+    const dadosCadastro = {
+      nome: name,
+      email: email,
+      senha: password,
+    };
+
+    axios.post('http://localhost:3000/auth/register', dadosCadastro)
       .then(response => {
-        console.log(response.data)
-        alert('Usuário Cadastrado com Sucesso!!!')
-        setCadastrar({
-          nome: '',
-          email: '',
-          senha: ''
-        })
+        console.log(response.data);
+        alert('Usuário Cadastrado com Sucesso!!!');
+        setName('');
+        setEmail('');
+        setPassword('');
       })
       .catch(error => {
-        console.error('Erro ao Cadastrar Usuário: ', error)
-        setErro(error.response.data)
-      })
+        console.error('Erro ao Cadastrar Usuário:', error);
+        setErro(error.response?.data || 'Erro desconhecido');
+      });
   };
 
   return (
     <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
       <h2>Cadastro Usuário</h2>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      <form onSubmit={handleSubmit} >
+      {erro && <div style={{ color: 'red' }}>{erro}</div>}
+      <form onSubmit={handleSubmit} method='post' >
         <div>
           <label htmlFor="name">Nome:</label>
           <input
