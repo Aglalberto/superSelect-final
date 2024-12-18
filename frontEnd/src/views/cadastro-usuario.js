@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 function CadastroUsuario() {
 
   return (
+    <div className='App'>
     <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
       <h2>Cadastro Usuário</h2>
       <div class="input-group mb-3">
@@ -41,7 +42,7 @@ function CadastroUsuario() {
   <textarea class="form-control" aria-label="With textarea"></textarea>
 </div>
     </div>
-    
+    </div>
   );
 };
 

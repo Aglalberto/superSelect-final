@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 function CadastroProduto() {
 
   return (
+<div className='App'>
     <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
+      
       <h2>Cadastro de Produto</h2>
       <form>
         <div>
@@ -53,6 +55,7 @@ function CadastroProduto() {
         </div>
         <button type="submit">Cadastrar Produto</button>
       </form>
+    </div>
     </div>
   );
 };

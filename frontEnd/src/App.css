@@ -36,3 +36,22 @@
     transform: rotate(360deg);
   }
 }
+
+.App{
+  background-image: url('./components/logo.jpg'); /* Caminho relativo a partir da pasta public */
+  background-size: cover; /* A imagem cobre toda a tela */
+  background-position: center; /* Centraliza a imagem */
+  background-attachment: fixed; /* A imagem não se move ao rolar a página */
+  height: 100vh; /* Faz com que o fundo ocupe toda a altura da tela */
+  margin: 0;
+
+}
+
+.content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+}

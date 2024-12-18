@@ -4,12 +4,15 @@ import Header from "./components/header";
 import HistoricoProdutos from './views/historico-produtos';
 import CadastroUsuario from './views/cadastro-usuario';
 import Login from './views/login';
+import Logo from './components/logo';
+import './App.css';
 
 function App() {
   return (
     <div className="App">
+      <Logo/>
       <Router>
-        <Header />
+        <Header/>
         <div className="main-content">
           <Routes>
             <Route path="views/login.js" element={<Login />} />
@@ -18,7 +21,7 @@ function App() {
             <Route path="views/historico-produtos.js" element={<HistoricoProdutos />} />
           </Routes>
         </div>
-      </Router>
+      </Router>  
     </div>
   );
 }

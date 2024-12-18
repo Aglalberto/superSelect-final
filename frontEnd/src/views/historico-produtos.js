@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 function HistoricoProdutos() {
   return (
+    <div className='App'>
     <div style={{ padding: "20px" }}>
       <h2>Histórico de Produtos</h2>
 
@@ -39,6 +40,7 @@ function HistoricoProdutos() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -1,12 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+
+
 function Header() {
   return (
-    <nav className="navbar">
+    <nav className="App">
+ 
       <ul>
         <li>
           <Link to="views/cadastro-usuario.js">Cadastro</Link>
+          
         </li>
         <li>
           <Link to="views/login.js">Login</Link>
@@ -15,10 +19,11 @@ function Header() {
           <Link to="views/cadastro-produto.js">Cadastro de Produtos</Link>
         </li>
         <li>
-          <Link to="views/historico-produtos.js">Histórico de Produtos</Link>
+          <Link to="views/historico-produtos.js" color=''>Histórico de Produtos</Link>
         </li>
       </ul>
     </nav>
+    
   );
 }
 
