@@ -1,0 +1,4 @@
+.nav-link.active {
+    color: #007bff !important; /* Cor azul */
+    font-weight: bold !important; /* Deixa o texto em negrito */
+  }

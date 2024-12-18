@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function Login({ setIsLoggedIn }) { // Receber a função setIsLoggedIn como prop
+function Login({ setIsLoggedIn }) {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,35 +43,39 @@ function Login({ setIsLoggedIn }) { // Receber a função setIsLoggedIn como pro
   };
 
   return (
-    <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
-      <h2>Login</h2>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+    <div className="container" style={{ maxWidth: '500px' }}>
+      <h2 className="text-center my-3 fs-3">Acesse o sistema</h2>
+      {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">E-mail:</label>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">E-mail</label>
           <input
             name="email"
             type="email"
             id="email"
+            className="form-control"
             placeholder="Digite seu e-mail"
             onChange={(e) => setEmail(e.target.value)}
             value={email}
             required
           />
         </div>
-        <div>
-          <label htmlFor="password">Senha:</label>
+
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">Senha</label>
           <input
             name="password"
             type="password"
             id="password"
+            className="form-control"
             placeholder="Digite sua senha"
             onChange={(e) => setPassword(e.target.value)}
             value={password}
             required
           />
         </div>
-        <button type="submit">Entrar</button>
+
+        <button type="submit" className="btn btn-success w-100 btn-lg">Acessar</button>
       </form>
     </div>
   );

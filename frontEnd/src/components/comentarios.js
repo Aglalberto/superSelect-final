@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; 
 import axios from "axios";
+import { Button, Card, Form, ListGroup } from "react-bootstrap"; 
 
 function Comentarios({ setIsLoggedIn }) {
   const { state } = useLocation();
@@ -12,7 +13,7 @@ function Comentarios({ setIsLoggedIn }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login"); // Redireciona para a página de login se não houver token
+      navigate("/login"); 
     }
   }, [navigate]);
 
@@ -26,7 +27,7 @@ function Comentarios({ setIsLoggedIn }) {
     try {
       const response = await axios.get(`http://localhost:3001/produtos/${produto.id}/comentarios`, {
         headers: {
-          Authorization: `Bearer ${token}` // Envia o token no cabeçalho
+          Authorization: `Bearer ${token}` 
         }
       });
       setComentarios(response.data);
@@ -56,14 +57,14 @@ function Comentarios({ setIsLoggedIn }) {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Envia o token no cabeçalho
+            Authorization: `Bearer ${token}`, 
           },
         }
       );
       
-      // Após adicionar o comentário, recarrega a lista de comentários
+      
       fetchComentarios();
-      setNovoComentario(""); // Limpa o campo de comentário
+      setNovoComentario(""); 
     } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
       if (error.response && error.response.status === 401) {
@@ -77,49 +78,73 @@ function Comentarios({ setIsLoggedIn }) {
   };
 
   const formatarData = (data) => {
-    const dateObj = new Date(data);  // Converte a string de data para um objeto Date
+    const dateObj = new Date(data);  
     const ano = dateObj.getFullYear();
-    const mes = String(dateObj.getMonth() + 1).padStart(2, '0');  // Mes começa em 0, então somamos 1
+    const mes = String(dateObj.getMonth() + 1).padStart(2, '0');  
     const dia = String(dateObj.getDate()).padStart(2, '0');
-    return `${ano}-${mes}-${dia}`; // Retorna a data no formato YYYY-MM-DD
+    return `${ano}-${mes}-${dia}`; 
   };
 
   return (
-    <div>
-      <div style={{ padding: "20px" }}>
-        <h2>Comentários do Produto</h2>
-        <h3>{produto.nome}</h3>
-        <p>
-          <strong>Descrição:</strong> {produto.descricao}
-        </p>
-        <p>
-          <strong>Categoria:</strong> {produto.categoria}
-        </p>
-        <p>
-          <strong>Preço:</strong> R$ {produto.preco}
-        </p>
-        <p>
-          <strong>Validade:</strong> {formatarData(produto.validade)}  {/* Chamando a função para formatar a data */}
-        </p>
-        {produto.img_url && <img src={produto.img_url} alt={produto.nome} style={{ width: "100%", maxHeight: "200px" }} />}
-        <div style={{ marginTop: "20px" }}>
-          <h4>Comentários:</h4>
-          <ul>
-            {comentarios.map((c) => (
-              <li key={c.id}>
-                <strong>{c.nome}: </strong>
-                {c.comentario}
-              </li>
-            ))}
-          </ul>
-          <textarea
-            value={novoComentario}
-            onChange={(e) => setNovoComentario(e.target.value)}
-            placeholder="Adicione um comentário"
-          ></textarea>
-          <button onClick={handleAddComentario}>Enviar</button>
-        </div>
-      </div>
+    <div className="container mt-4 mb-4">
+      <Card style={{ borderRadius: "8px", border: "1px solid #ddd", padding: "20px" }}>
+        <Card.Body>
+          <h2 className="mb-4">Comentários do Produto</h2>
+          <h1 className="mb-4">{produto.nome}</h1>
+          <p>
+            <strong>Descrição:</strong> {produto.descricao}
+          </p>
+          <p>
+            <strong>Categoria:</strong> {produto.categoria}
+          </p>
+          <p>
+            <strong>Preço:</strong> R$ {produto.preco}
+          </p>
+          <p>
+            <strong>Validade:</strong> {formatarData(produto.validade)} {/* Chamando a função para formatar a data */}
+          </p>
+          {produto.img_url && (
+            <img
+              src={produto.img_url}
+              alt={produto.nome}
+              className="card-img-top mb-3"
+              style={{
+                width: "100%",
+                maxHeight: "250px",
+                objectFit: "contain",
+                borderRadius: "8px", 
+              }}
+            />
+          )}
+
+          <div style={{ marginTop: "20px" }}>
+            <h4>Comentários:</h4>
+            <ListGroup>
+              {comentarios.map((c) => (
+                <ListGroup.Item key={c.id} style={{ borderRadius: "8px", border: "1px solid #ddd", marginBottom: "10px" }}>
+                  <strong>{c.nome}: </strong>
+                  {c.comentario}
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+            <Form.Control
+              as="textarea"
+              rows={2}
+              value={novoComentario}
+              onChange={(e) => setNovoComentario(e.target.value)}
+              placeholder="Adicione um comentário"
+              style={{ borderRadius: "8px", marginBottom: "10px", padding: "10px" }}
+            />
+            <Button
+              onClick={handleAddComentario}
+              variant="primary"
+              style={{ width: "100%", borderRadius: "8px", padding: "10px" }}
+            >
+              Enviar Comentário
+            </Button>
+          </div>
+        </Card.Body>
+      </Card>
     </div>
   );
 }

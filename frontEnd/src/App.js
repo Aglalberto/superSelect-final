@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import CadastroProduto from "./views/cadastro-produto";
 import NavLogin from "./components/nav-login";
 import NavLogged from "./components/nav-logged";
@@ -22,14 +22,17 @@ function App() {
   return (
     <div className="App">
       <Router>
+        {/* Exibe o NavLogin se não estiver logado, ou NavLogged se estiver logado */}
         {isLoggedIn ? (
-          <NavLogged setIsLoggedIn={setIsLoggedIn} /> // Passando a função setIsLoggedIn para o NavLogged
+          <NavLogged setIsLoggedIn={setIsLoggedIn} />
         ) : (
           <NavLogin />
         )}
 
         <div className="main-content">
           <Routes>
+            {/* Rota inicial: redireciona para a página de login se não estiver logado */}
+            <Route path="/" element={isLoggedIn ? <Navigate to="/historico-produtos" /> : <Navigate to="/login" />} />
             <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
             <Route path="/cadastro-produto" element={<CadastroProduto />} />
