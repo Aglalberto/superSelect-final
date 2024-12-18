@@ -32,17 +32,34 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
    const { email, password } = req.body;
-   try {
-      const user = await userModel.findUserByEmail(email);
-      if (!user) return res.status(400).json({ message: 'Usuário ou senha inválidos' });
-
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) return res.status(400).json({ message: 'Usuário ou senha inválidos' });
-
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      console.log(token) // analisar valores
-      res.json({ token });
-   } catch (error) {
-      res.status(500).json({ error: error.message });
+   
+   if (!email || !password) {
+     return res.status(400).json({ message: 'E-mail e senha são obrigatórios.' });
    }
-};
+ 
+   try {
+     // Certifique-se de passar o email para o método findUserByEmail
+     const user = await userModel.findUserByEmail(email);
+ 
+     // Se o usuário não for encontrado, retorna erro 400
+     if (!user) {
+       return res.status(400).json({ message: 'Usuário não encontrado' });
+     }
+ 
+     // Comparar a senha enviada com a senha criptografada no banco
+     const isPasswordValid = await bcrypt.compare(password, user.senha);
+     if (!isPasswordValid) {
+       return res.status(400).json({ message: 'Senha inválida' });
+     }
+ 
+     // Gerar o token de autenticação
+     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+     
+     // Retornar o token para o cliente
+     res.json({ token });
+   } catch (error) {
+     console.error('Erro ao realizar login:', error);
+     res.status(500).json({ message: 'Erro interno no servidor.' });
+   }
+ };
+

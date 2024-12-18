@@ -7,6 +7,10 @@ const pool = mysql.createPool({
    user: process.env.DB_USER,
    password: process.env.DB_PASS,
    database: process.env.DB_NAME,
- })
+});
 
-export default pool
+pool.getConnection()
+   .then(() => console.log('Conexão com o banco de dados estabelecida'))
+   .catch((err) => console.error('Erro ao conectar no banco de dados: ', err));
+
+export default pool;

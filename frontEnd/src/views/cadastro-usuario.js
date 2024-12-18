@@ -19,7 +19,7 @@ const CadastroUsuario = () => {
       senha: password,
     };
 
-    axios.post('http://localhost:3000/auth/register', dadosCadastro)
+    axios.post('http://localhost:3001/auth/register', dadosCadastro)
       .then(response => {
         console.log(response.data);
         alert('Usuário Cadastrado com Sucesso!!!');
