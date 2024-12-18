@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:3000' })); // Permitir requisições do frontend
+app.use(cors({ origin: 'http://localhost:3001' })); // Permitir requisições do frontend
 
 app.use('/auth', authRoutes);
 
