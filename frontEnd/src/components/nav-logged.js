@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 function NavLogged({ setIsLoggedIn }) {
   const navigate = useNavigate();
@@ -10,10 +10,10 @@ function NavLogged({ setIsLoggedIn }) {
     localStorage.removeItem('token');
 
     // Atualizar o estado de login
-    setIsLoggedIn(false); // Isso vai atualizar o estado de login para false
+    setIsLoggedIn(false);
 
     // Redirecionar para a tela de login
-    navigate('/login'); // Redireciona para a página de login
+    navigate('/login');
   };
 
   // Função para adicionar classe de 'ativo' aos itens do menu
@@ -26,7 +26,7 @@ function NavLogged({ setIsLoggedIn }) {
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <div className="container">
           {/* Logo ou Título (Opcional) */}
-          <img src='assets/imgs/favicon.png' alt="Logo" />
+          <img src="assets/imgs/favicon.png" alt="Logo" />
 
           {/* Botão "Sair" posicionado no canto superior direito */}
           <div className="position-absolute top-0 end-0 p-3">
@@ -37,20 +37,20 @@ function NavLogged({ setIsLoggedIn }) {
 
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <a
+              <Link
+                to="/cadastro-produto"
                 className={`nav-link ${getActiveClass('/cadastro-produto')}`}
-                href="/cadastro-produto"
               >
                 Cadastro de Produto
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
-              <a
+              <Link
+                to="/historico-produtos"
                 className={`nav-link ${getActiveClass('/historico-produtos')}`}
-                href="/historico-produtos"
               >
                 Produtos Cadastrados
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

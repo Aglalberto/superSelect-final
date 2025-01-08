@@ -31,13 +31,26 @@ function App() {
 
         <div className="main-content">
           <Routes>
-            {/* Rota inicial: redireciona para a página de login se não estiver logado */}
+            {/* Rota inicial: redireciona para login ou para a página principal do sistema */}
             <Route path="/" element={isLoggedIn ? <Navigate to="/historico-produtos" /> : <Navigate to="/login" />} />
+
+            {/* Rotas públicas */}
             <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
-            <Route path="/cadastro-produto" element={<CadastroProduto />} />
-            <Route path="/historico-produtos" element={<HistoricoProdutos />} />
-            <Route path="/comentarios" element={<Comentarios setIsLoggedIn={setIsLoggedIn} />} />
+
+            {/* Rotas protegidas */}
+            <Route
+              path="/cadastro-produto"
+              element={isLoggedIn ? <CadastroProduto /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/historico-produtos"
+              element={isLoggedIn ? <HistoricoProdutos /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/comentarios"
+              element={isLoggedIn ? <Comentarios setIsLoggedIn={setIsLoggedIn} /> : <Navigate to="/login" />}
+            />
           </Routes>
         </div>
       </Router>

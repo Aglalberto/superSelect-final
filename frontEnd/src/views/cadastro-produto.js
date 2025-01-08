@@ -123,7 +123,6 @@ function CadastroProduto() {
             id="validade"
             value={validade}
             onChange={(e) => setValidade(e.target.value)}
-            required
           />
         </div>
 
