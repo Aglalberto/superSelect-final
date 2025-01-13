@@ -12,12 +12,20 @@ export const cadastrarProduto = async (req, res) => {
     console.log('Dados recebidos:', { nome, descricao, categoria, preco, validade, img_url });
 
     const sql = 'INSERT INTO produtos (nome, descricao, categoria, preco, validade, img_url) VALUES (?, ?, ?, ?, ?, ?)';
-    const [result] = await pool.query(sql, [nome, descricao, categoria, preco, validade || null, img_url]);
+    const [result] = await pool.query(sql, [
+      nome,
+      descricao,
+      categoria,
+      preco,
+      validade && validade.trim() !== "" ? validade : "Indeterminada",
+      img_url,
+    ]);
+
     console.log('Produto inserido com sucesso:', result);
 
     res.status(201).send('Produto cadastrado com sucesso!');
   } catch (err) {
-    console.error('Erro ao cadastrar produto:', err);  
+    console.error('Erro ao cadastrar produto:', err);
     res.status(500).send('Erro ao cadastrar produto');
   }
 };
@@ -27,12 +35,19 @@ export const listarProdutos = async (req, res) => {
     const sql = 'SELECT * FROM produtos';
     const [produtos] = await pool.query(sql);
 
-    res.status(200).json(produtos);
+    const produtosComValidadeFormatada = produtos.map((produto) => ({
+      ...produto,
+      validade: produto.validade === "Indeterminada" || !produto.validade ? "Indeterminada" : produto.validade,
+    }));
+
+    res.status(200).json(produtosComValidadeFormatada);
   } catch (err) {
     console.error('Erro ao listar produtos:', err);
     res.status(500).send('Erro ao listar produtos');
   }
 };
+
+
 
 export const listarComentarios = async (req, res) => {
   const { id } = req.params;
@@ -66,7 +81,7 @@ export const adicionarComentario = async (req, res) => {
 };
 
 export const editarProduto = async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
   const { nome, descricao, categoria, preco, validade, img_url } = req.body;
 
   if (!id || !nome || !descricao || !categoria || !preco || !validade) {
@@ -75,11 +90,21 @@ export const editarProduto = async (req, res) => {
 
   try {
     const sql = `
-          UPDATE produtos 
-          SET nome = ?, descricao = ?, categoria = ?, preco = ?, validade = ?, img_url = ?
-          WHERE id = ?
-      `;
-    const [result] = await pool.query(sql, [nome, descricao, categoria, preco, validade, img_url, id]);
+    UPDATE produtos 
+    SET nome = ?, descricao = ?, categoria = ?, preco = ?, validade = ?, img_url = ?
+    WHERE id = ?
+  `;
+    const [result] = await pool.query(sql, [
+      nome,
+      descricao,
+      categoria,
+      preco,
+      validade === "Indeterminada" ? "Indeterminada" : validade,
+      img_url,
+      id,
+    ]);
+
+
 
     if (result.affectedRows === 0) {
       return res.status(404).send('Produto não encontrado');

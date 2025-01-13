@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; 
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Button, Card, Form, ListGroup } from "react-bootstrap"; 
+import { Button, Card, Form, ListGroup } from "react-bootstrap";
 
 function Comentarios({ setIsLoggedIn }) {
   const { state } = useLocation();
   const { produto } = state;
   const [comentarios, setComentarios] = useState([]);
   const [novoComentario, setNovoComentario] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login"); 
+      navigate("/login");
     }
   }, [navigate]);
 
@@ -27,7 +27,7 @@ function Comentarios({ setIsLoggedIn }) {
     try {
       const response = await axios.get(`http://localhost:3001/produtos/${produto.id}/comentarios`, {
         headers: {
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         }
       });
       setComentarios(response.data);
@@ -57,14 +57,14 @@ function Comentarios({ setIsLoggedIn }) {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      
-      
+
+
       fetchComentarios();
-      setNovoComentario(""); 
+      setNovoComentario("");
     } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
       if (error.response && error.response.status === 401) {
@@ -78,18 +78,45 @@ function Comentarios({ setIsLoggedIn }) {
   };
 
   const formatarData = (data) => {
-    const dateObj = new Date(data);  
+    if (!data || data === "Indeterminada") {
+      return "Indeterminada";
+    }
+
+    const dateObj = new Date(data);
+    if (isNaN(dateObj.getTime())) {
+      return "Indeterminada"; // Retorna "Indeterminada" se a data for inválida
+    }
+
     const ano = dateObj.getFullYear();
-    const mes = String(dateObj.getMonth() + 1).padStart(2, '0');  
-    const dia = String(dateObj.getDate()).padStart(2, '0');
-    return `${ano}-${mes}-${dia}`; 
+    const mes = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const dia = String(dateObj.getDate()).padStart(2, "0");
+    return `${dia}-${mes}-${ano}`;
   };
 
+
   return (
-    <div className="container mt-4 mb-4">
+
+    <div className="container mt-4 mb-4 ">
+      <div class="d-flex">
+        <div className="mb-4">
+          <Button
+            variant="secondary"
+            onClick={() => navigate(-1)}
+            style={{ borderRadius: "8px" }}
+          >
+            <i className="bi bi-arrow-left"></i> Voltar
+          </Button>
+
+        </div>
+        <div>
+          <h2 className="mb-4 ms-4">Comentários do Produto</h2>
+        </div>
+      </div>
+
       <Card style={{ borderRadius: "8px", border: "1px solid #ddd", padding: "20px" }}>
         <Card.Body>
-          <h2 className="mb-4">Comentários do Produto</h2>
+
+
           <h1 className="mb-4">{produto.nome}</h1>
           <p>
             <strong>Descrição:</strong> {produto.descricao}
@@ -101,8 +128,9 @@ function Comentarios({ setIsLoggedIn }) {
             <strong>Preço:</strong> R$ {produto.preco}
           </p>
           <p>
-            <strong>Validade:</strong> {formatarData(produto.validade)} {/* Chamando a função para formatar a data */}
+            <strong>Validade:</strong> {produto.validade ? formatarData(produto.validade) : "Indeterminada"}
           </p>
+
           {produto.img_url && (
             <img
               src={produto.img_url}
@@ -112,7 +140,7 @@ function Comentarios({ setIsLoggedIn }) {
                 width: "100%",
                 maxHeight: "250px",
                 objectFit: "contain",
-                borderRadius: "8px", 
+                borderRadius: "8px",
               }}
             />
           )}
@@ -145,7 +173,7 @@ function Comentarios({ setIsLoggedIn }) {
           </div>
         </Card.Body>
       </Card>
-    </div>
+    </div >
   );
 }
 

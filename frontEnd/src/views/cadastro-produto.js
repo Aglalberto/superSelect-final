@@ -10,20 +10,16 @@ function CadastroProduto() {
   const [imgUrl, setImgUrl] = useState('');
   const [erro, setErro] = useState('');
   const [imgPreview, setImgPreview] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [validadeIndeterminada, setValidadeIndeterminada] = useState(false);
 
-  // Função para formatar o preço com vírgulas e duas casas decimais
   const formatPreco = (value) => {
-    // Remover tudo que não é número
     let formattedValue = value.replace(/\D/g, '');
-
-    // Adicionar a vírgula para separação de milhar e manter 2 casas decimais
     formattedValue = (formattedValue / 100).toFixed(2).replace('.', ',');
-
-    // Se começar com uma vírgula, remove
     return formattedValue.startsWith(',') ? `0${formattedValue}` : formattedValue;
   };
 
-  // Manipulador de mudança no preço com formatação automática
   const handlePrecoChange = (e) => {
     const value = e.target.value;
     const formattedValue = formatPreco(value);
@@ -33,27 +29,51 @@ function CadastroProduto() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const token = localStorage.getItem('token');
+    const formatValidade = validade && validade.match(/^\d{4}-\d{2}-\d{2}$/) ? validade : null;
 
-      const response = await axios.post(
-        'http://localhost:3001/produtos/produto', // URL correta
-        { nome, descricao, categoria, preco, validade, img_url: imgUrl },
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.post(
+        "http://localhost:3001/produtos/produto",
+        {
+          nome,
+          descricao,
+          categoria,
+          preco,
+          validade: validadeIndeterminada ? "Indeterminada" : formatValidade,
+          img_url: imgUrl,
+        },
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      alert('Produto cadastrado com sucesso!');
+      setToastMessage("Produto cadastrado com sucesso!");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000); 
+
+      // Limpar os campos
+      setNome("");
+      setDescricao("");
+      setCategoria("");
+      setPreco("");
+      setValidade("");
+      setImgUrl("");
+      setImgPreview("");
+      setErro("");
+      setValidadeIndeterminada(false); 
     } catch (error) {
-      console.error('Erro ao cadastrar produto: ', error);
-      setErro('Erro ao cadastrar produto. Tente novamente.');
+      console.error("Erro ao cadastrar produto: ", error);
+      setErro("Erro ao cadastrar produto. Tente novamente.");
     }
   };
 
-  // Função para exibir a imagem pré-visualizada
+
+
+
   const handleImagePreview = () => {
     setImgPreview(imgUrl);
   };
@@ -62,6 +82,28 @@ function CadastroProduto() {
     <div className="container mt-4">
       <h2 className="mb-4">Cadastro de Produto</h2>
       {erro && <div className="alert alert-danger">{erro}</div>}
+
+      <div
+        className={`toast bg-success position-fixed bottom-0 end-0 p-2 m-3 ${showToast ? 'show' : ''}`}
+        style={{ zIndex: 1050 }}
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div className="toast-header bg-success d-flex justify-content-between border-0 text-light">
+          <span className="fw-bold fs-5">{toastMessage}</span>
+          <button
+            type="button"
+            className="btn-close btn-close-custom"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+            onClick={() => setShowToast(false)}
+          ></button>
+        </div>
+
+
+      </div>
+
 
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -105,11 +147,11 @@ function CadastroProduto() {
         <div className="mb-3">
           <label htmlFor="preco" className="form-label">Preço:</label>
           <input
-            type="text" // Mudar de 'number' para 'text' para aplicar a máscara
+            type="text"
             className="form-control"
             id="preco"
             value={preco}
-            onChange={handlePrecoChange} // Usar o manipulador de mudança
+            onChange={handlePrecoChange}
             required
             placeholder="Preço do produto"
           />
@@ -121,10 +163,33 @@ function CadastroProduto() {
             type="date"
             className="form-control"
             id="validade"
-            value={validade}
-            onChange={(e) => setValidade(e.target.value)}
+            value={validadeIndeterminada ? "" : validade}
+            onChange={(e) => {
+              const inputDate = e.target.value;
+
+              const isValidDate = /^\d{4}-\d{0,2}-\d{0,2}$/.test(inputDate);
+
+              if (isValidDate) {
+                setValidade(inputDate);
+              }
+            }}
+            disabled={validadeIndeterminada}
           />
         </div>
+
+        <div className="form-check mb-3">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="validadeIndeterminada"
+            checked={validadeIndeterminada}
+            onChange={(e) => setValidadeIndeterminada(e.target.checked)}
+          />
+          <label htmlFor="validadeIndeterminada" className="form-check-label">
+            Indeterminada
+          </label>
+        </div>
+
 
         <div className="mb-3">
           <label htmlFor="imgUrl" className="form-label">Imagem (URL):</label>

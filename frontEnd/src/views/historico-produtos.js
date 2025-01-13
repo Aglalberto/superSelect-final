@@ -12,6 +12,37 @@ function HistoricoProdutos() {
   const navigate = useNavigate();
   const [produtoEditar, setProdutoEditar] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [validadeIndeterminada, setValidadeIndeterminada] = useState(false);
+  const [searchBarVisible, setSearchBarVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
+  const totalPages = Math.ceil(
+    (filteredProducts.length > 0 ? filteredProducts : produtos).length / itemsPerPage
+  );
+
+  const currentProducts = (filteredProducts.length > 0 ? filteredProducts : produtos).slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+
+  useEffect(() => {
+    if (viewMode === "cards") {
+      document.body.classList.add("cards-mode");
+    } else {
+      document.body.classList.remove("cards-mode");
+    }
+    return () => document.body.classList.remove("cards-mode");
+  }, [viewMode]);
 
 
   useEffect(() => {
@@ -40,12 +71,33 @@ function HistoricoProdutos() {
   };
 
   const formatarData = (data) => {
+    if (!data || data === "Indeterminada") {
+      return "Indeterminada";
+    }
+
     const dateObj = new Date(data);
+    if (isNaN(dateObj)) {
+      return "Indeterminada";
+    }
+
     const ano = dateObj.getFullYear();
     const mes = String(dateObj.getMonth() + 1).padStart(2, "0");
     const dia = String(dateObj.getDate()).padStart(2, "0");
-    return `${ano}-${mes}-${dia}`;
+    return `${dia}-${mes}-${ano}`;
   };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (query.trim() === "") {
+      setFilteredProducts([]);
+    } else {
+      const results = produtos.filter((produto) =>
+        produto.nome.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredProducts(results);
+    }
+  };
+
 
   const handleDelete = (produtoId) => {
     setProdutoExcluir(produtoId);
@@ -78,10 +130,12 @@ function HistoricoProdutos() {
   const handleEdit = (produto) => {
     setProdutoEditar({
       ...produto,
-      validade: produto.validade ? formatarData(produto.validade) : "",
+      validade: produto.validade === "Indeterminada" ? "" : produto.validade,
     });
+    setValidadeIndeterminada(produto.validade === "Indeterminada");
     setShowEditModal(true);
   };
+
 
 
   const cancelarEdicao = () => {
@@ -90,17 +144,41 @@ function HistoricoProdutos() {
   };
 
   const confirmarEdicao = async () => {
+    let validadeCorrigida = produtoEditar.validade;
+    if (validadeCorrigida && !validadeIndeterminada) {
+      const ano = parseInt(validadeCorrigida.split("-")[0], 10);
+      if (ano < 1000 || ano > 9999) {
+        alert("Ano da validade deve ter 4 dígitos.");
+        return;
+      }
+    }
+
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:3001/produtos/produto/${produtoEditar.id}`, produtoEditar, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      setProdutos(
-        produtos.map((produto) =>
-          produto.id === produtoEditar.id ? produtoEditar : produto
+      await axios.put(
+        `http://localhost:3001/produtos/produto/${produtoEditar.id}`,
+        {
+          ...produtoEditar,
+          validade: validadeIndeterminada ? "Indeterminada" : validadeCorrigida,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setProdutos((prevProdutos) =>
+        prevProdutos.map((produto) =>
+          produto.id === produtoEditar.id
+            ? {
+              ...produtoEditar,
+              validade: validadeIndeterminada
+                ? "Indeterminada"
+                : validadeCorrigida,
+            }
+            : produto
         )
       );
 
@@ -113,25 +191,67 @@ function HistoricoProdutos() {
   };
 
 
+
+
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Produtos Cadastrados</h2>
-        <button
-          className="btn btn-outline-primary"
-          onClick={() => setViewMode(viewMode === "cards" ? "lista" : "cards")}
-        >
-          <i className={`bi ${viewMode === "cards" ? "bi-list" : "bi-grid-fill"}`}></i>
-        </button>
+        <div className="d-flex align-items-center">
+          <button
+            className="btn btn-outline-primary me-2"
+            onClick={() => setViewMode(viewMode === "cards" ? "lista" : "cards")}
+          >
+            <i className={`bi ${viewMode === "cards" ? "bi-list" : "bi-grid-fill"}`}></i>
+          </button>
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => setSearchBarVisible(!searchBarVisible)}
+          >
+            <i className="bi bi-search"></i>
+          </button>
+        </div>
       </div>
+
+      {searchBarVisible && (
+        <div className="mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Pesquisar produto..."
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+          {filteredProducts.length > 0 && (
+            <ul className="list-group mt-2">
+              {filteredProducts.map((produto) => (
+                <li
+                  key={produto.id}
+                  className="list-group-item"
+                  onClick={() => navigate(`/produto/${produto.id}`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {produto.nome}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+
 
       {erro && <p className="text-danger">{erro}</p>}
 
-      {produtos.length === 0 ? (
+      {(filteredProducts.length > 0 ? filteredProducts : produtos).length === 0 ? (
         <p className="text-center">Não há nenhum produto cadastrado.</p>
       ) : viewMode === "cards" ? (
-        <div className="row justify-content-center">
-          {produtos.map((produto) => (
+        <div
+          className={`row justify-content-start ${viewMode === "cards" ? "cards-mode" : ""
+            }`}
+        >
+
+          {currentProducts.map((produto) => (
             <div className="col-md-3 mb-4" key={produto.id}>
               <div className="card" style={{ borderRadius: "8px", border: "1px solid #ddd", height: "auto" }}>
                 {produto.img_url && (
@@ -160,37 +280,37 @@ function HistoricoProdutos() {
                   <p className="card-text">
                     <strong>Validade:</strong> {formatarData(produto.validade)}
                   </p>
-                  <div className="d-flex justify-content-center">
+                  <div className="d-flex justify-content-end">
                     <button
                       onClick={() => handleViewComments(produto)}
-                      className="btn btn-info btn-sm mx-1"
+                      className="btn btn-sm mx-1"
                       title="Comentários"
                     >
-                      <i className="bi bi-chat"></i>
+                      <box-icon name="chat" color="#3a506b"></box-icon>
                     </button>
 
                     <button
                       onClick={() => handleEdit(produto)}
-                      className="btn btn-warning btn-sm mx-1"
+                      className="btn btn-sm mx-1"
                       title="Editar"
                     >
-                      <i className="bi bi-pencil"></i>
+                      <box-icon name="edit" color="#3a506b"></box-icon>
                     </button>
 
                     <button
                       onClick={() => handleDelete(produto.id)}
-                      className="btn btn-danger btn-sm mx-1"
+                      className="btn btn-sm mx-1"
                       title="Excluir"
                     >
-                      <i className="bi bi-trash"></i>
+                      <box-icon name="trash" color="#3a506b"></box-icon>
                     </button>
                   </div>
                 </div>
-
               </div>
             </div>
           ))}
         </div>
+
       ) : (
         <table className="table table-striped">
           <thead>
@@ -204,7 +324,7 @@ function HistoricoProdutos() {
             </tr>
           </thead>
           <tbody>
-            {produtos.map((produto) => (
+            {(filteredProducts.length > 0 ? filteredProducts : produtos).map((produto) => (
               <tr key={produto.id}>
                 <td>{produto.nome}</td>
                 <td>{produto.descricao}</td>
@@ -214,29 +334,28 @@ function HistoricoProdutos() {
                 <td>
                   <button
                     onClick={() => handleViewComments(produto)}
-                    className="btn btn-info btn-sm me-2"
+                    className="btn btn-sm"
                     title="Comentários"
                   >
-                    <i className="bi bi-chat"></i>
+                    <box-icon name='chat' color='#3a506b' ></box-icon>
                   </button>
 
                   <button
                     onClick={() => handleEdit(produto)}
-                    className="btn btn-warning btn-sm me-2"
+                    className="btn btn-sm"
                     title="Editar"
                   >
-                    <i className="bi bi-pencil"></i>
+                    <box-icon name='edit' color='#3a506b'></box-icon>
                   </button>
 
                   <button
                     onClick={() => handleDelete(produto.id)}
-                    className="btn btn-danger btn-sm"
+                    className="btn btn-sm"
                     title="Excluir"
                   >
-                    <i className="bi bi-trash"></i>
+                    <box-icon name='trash' color='#3a506b'></box-icon>
                   </button>
                 </td>
-
               </tr>
             ))}
           </tbody>
@@ -289,12 +408,36 @@ function HistoricoProdutos() {
               <input
                 type="date"
                 className="form-control"
-                value={produtoEditar?.validade || ""}
-                onChange={(e) =>
-                  setProdutoEditar({ ...produtoEditar, validade: e.target.value })
-                }
+                value={validadeIndeterminada ? "" : produtoEditar?.validade || ""}
+                onChange={(e) => {
+                  const inputDate = e.target.value;
+
+                  const isValidDate = /^\d{4}-\d{0,2}-\d{0,2}$/.test(inputDate);
+
+                  if (isValidDate) {
+                    setProdutoEditar({
+                      ...produtoEditar,
+                      validade: inputDate,
+                    });
+                  }
+                }}
+                disabled={validadeIndeterminada}
               />
             </div>
+
+            <div className="form-check mb-3">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="validadeIndeterminada"
+                checked={validadeIndeterminada}
+                onChange={(e) => setValidadeIndeterminada(e.target.checked)}
+              />
+              <label htmlFor="validadeIndeterminada" className="form-check-label">
+                Indeterminada
+              </label>
+            </div>
+
             <div className="form-group mb-3">
               <label>URL da Imagem</label>
               <input
@@ -304,9 +447,9 @@ function HistoricoProdutos() {
                 onChange={(e) => setProdutoEditar({ ...produtoEditar, img_url: e.target.value })}
               />
             </div>
-
-
           </form>
+
+
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelarEdicao}>
@@ -336,7 +479,36 @@ function HistoricoProdutos() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <div className="d-flex justify-content-center mt-4">
+        <nav>
+          <ul className="pagination">
+            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
+                Anterior
+              </button>
+            </li>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <li
+                key={index}
+                className={`page-item ${currentPage === index + 1 ? "active" : ""}`}
+              >
+                <button className="page-link" onClick={() => handlePageChange(index + 1)}>
+                  {index + 1}
+                </button>
+              </li>
+            ))}
+            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+              <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
+                Próximo
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
     </div>
+
   );
 }
 
