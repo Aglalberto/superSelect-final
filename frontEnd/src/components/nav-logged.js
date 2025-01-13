@@ -23,7 +23,7 @@ function NavLogged({ setIsLoggedIn }) {
 
   return (
     <div className="container-fluid p-0">
-      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+      <nav className="navbar navbar-expand-lg navbar-light">
         <div className="container d-flex align-items-center justify-content-between">
           {/* Logo ou Título */}
           <div className="logo-container">

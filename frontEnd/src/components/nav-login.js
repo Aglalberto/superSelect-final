@@ -11,7 +11,7 @@ function NavLogin() {
 
   return (
     <>
-      <img src="/assets/imgs/logo.png" alt="Logo" className="d-block mx-auto my-3 w-50" />
+      <img src="/assets/imgs/logo.png" alt="Logo" className="d-block mx-auto my-3 w-50 mt-5" />
 
       <nav className="navbar d-flex justify-content-center">
         <ul className="list-unstyled d-flex">

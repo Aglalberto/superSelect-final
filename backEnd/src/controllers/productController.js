@@ -1,4 +1,7 @@
 import pool from '../db_config/connection.js';  // Certifique-se de que está importando corretamente
+import multer from 'multer';
+import path from 'path';
+
 
 export const cadastrarProduto = async (req, res) => {
   const { nome, descricao, categoria, preco, validade, img_url } = req.body;
@@ -134,3 +137,5 @@ export const excluirProduto = async (req, res) => {
     res.status(500).send('Erro ao excluir produto');
   }
 };
+
+
