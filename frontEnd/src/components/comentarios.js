@@ -131,16 +131,15 @@ function Comentarios({ setIsLoggedIn }) {
             <strong>Validade:</strong> {produto.validade ? formatarData(produto.validade) : "Indeterminada"}
           </p>
 
-          {produto.img_url && (
+          {produto.img_path && (
             <img
-              src={produto.img_url}
+              src={`http://localhost:3001${produto.img_path}`}
               alt={produto.nome}
-              className="card-img-top mb-3"
+              className="card-img-top"
               style={{
+                height: "250px",
                 width: "100%",
-                maxHeight: "250px",
                 objectFit: "contain",
-                borderRadius: "8px",
               }}
             />
           )}

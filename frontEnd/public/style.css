@@ -1,14 +1,13 @@
-body.cards-mode {
+body {
+  margin: 0;
   overflow-y: scroll;
   -ms-overflow-style: none;
+  
 }
 
-
-body.cards-mode::-webkit-scrollbar {
+body::-webkit-scrollbar {
   display: none;
 }
-
-
 
 .nav-link.active {
   color: #007bff !important;
@@ -16,10 +15,6 @@ body.cards-mode::-webkit-scrollbar {
 
 }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
 
 img {
   max-width: 100%;

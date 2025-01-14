@@ -153,30 +153,40 @@ function HistoricoProdutos() {
       }
     }
 
-    try {
-      const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append('nome', produtoEditar.nome);
+    formData.append('descricao', produtoEditar.descricao);
+    formData.append('categoria', produtoEditar.categoria);
+    formData.append('preco', produtoEditar.preco.replace(',', '.'));
+    formData.append('validade', validadeIndeterminada ? 'Indeterminada' : validadeCorrigida);
 
-      await axios.put(
+    // Adicionar imagem apenas se for alterada
+    if (produtoEditar.imagem && produtoEditar.imagem instanceof File) {
+      formData.append('imagem', produtoEditar.imagem);
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await axios.put(
         `http://localhost:3001/produtos/produto/${produtoEditar.id}`,
-        {
-          ...produtoEditar,
-          validade: validadeIndeterminada ? "Indeterminada" : validadeCorrigida,
-        },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
+
+      const updatedProduto = response.data; // Produto atualizado retornado do backend
 
       setProdutos((prevProdutos) =>
         prevProdutos.map((produto) =>
           produto.id === produtoEditar.id
             ? {
-              ...produtoEditar,
-              validade: validadeIndeterminada
-                ? "Indeterminada"
-                : validadeCorrigida,
+              ...produto,
+              ...updatedProduto, // Atualiza com os novos dados, incluindo `img_path`
             }
             : produto
         )
@@ -185,8 +195,8 @@ function HistoricoProdutos() {
       setShowEditModal(false);
       setProdutoEditar(null);
     } catch (error) {
-      console.error("Erro ao editar produto:", error);
-      alert("Erro ao editar o produto. Tente novamente.");
+      console.error('Erro ao editar produto:', error);
+      alert('Erro ao editar o produto. Tente novamente.');
     }
   };
 
@@ -254,9 +264,9 @@ function HistoricoProdutos() {
           {currentProducts.map((produto) => (
             <div className="col-md-3 mb-4" key={produto.id}>
               <div className="card" style={{ borderRadius: "8px", border: "1px solid #ddd", height: "auto" }}>
-                {produto.img_url && (
+                {produto.img_path && (
                   <img
-                    src={produto.img_url}
+                    src={`http://localhost:3001${produto.img_path}`}
                     alt={produto.nome}
                     className="card-img-top"
                     style={{
@@ -266,6 +276,7 @@ function HistoricoProdutos() {
                     }}
                   />
                 )}
+
                 <div className="card-body">
                   <h2 className="card-title mb-4">{produto.nome}</h2>
                   <p className="card-text">
@@ -439,14 +450,16 @@ function HistoricoProdutos() {
             </div>
 
             <div className="form-group mb-3">
-              <label>URL da Imagem</label>
+              <label>Imagem</label>
               <input
-                type="url"
+                type="file"
                 className="form-control"
-                value={produtoEditar?.img_url || ""}
-                onChange={(e) => setProdutoEditar({ ...produtoEditar, img_url: e.target.value })}
+                onChange={(e) =>
+                  setProdutoEditar({ ...produtoEditar, imagem: e.target.files[0] })
+                }
               />
             </div>
+
           </form>
 
 

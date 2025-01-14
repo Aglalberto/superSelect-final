@@ -8,8 +8,8 @@ function CadastroProduto() {
   const [preco, setPreco] = useState('');
   const [validade, setValidade] = useState('');
   const [imgUrl, setImgUrl] = useState('');
+  const [imgPreview, setImgPreview] = useState(null); // Estado para armazenar o preview da imagem
   const [erro, setErro] = useState('');
-  const [imgPreview, setImgPreview] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [validadeIndeterminada, setValidadeIndeterminada] = useState(false);
@@ -26,56 +26,55 @@ function CadastroProduto() {
     setPreco(formattedValue);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const formatValidade = validade && validade.match(/^\d{4}-\d{2}-\d{2}$/) ? validade : null;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      await axios.post(
-        "http://localhost:3001/produtos/produto",
-        {
-          nome,
-          descricao,
-          categoria,
-          preco,
-          validade: validadeIndeterminada ? "Indeterminada" : formatValidade,
-          img_url: imgUrl,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setToastMessage("Produto cadastrado com sucesso!");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 4000); 
-
-      // Limpar os campos
-      setNome("");
-      setDescricao("");
-      setCategoria("");
-      setPreco("");
-      setValidade("");
-      setImgUrl("");
-      setImgPreview("");
-      setErro("");
-      setValidadeIndeterminada(false); 
-    } catch (error) {
-      console.error("Erro ao cadastrar produto: ", error);
-      setErro("Erro ao cadastrar produto. Tente novamente.");
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImgUrl(file);
+      setImgPreview(URL.createObjectURL(file)); // Cria uma URL temporária para exibir a imagem
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
+    const formData = new FormData();
+    formData.append('nome', nome);
+    formData.append('descricao', descricao);
+    formData.append('categoria', categoria);
+    formData.append('preco', preco.replace(',', '.')); // Converter preço para ponto flutuante
+    formData.append('validade', validadeIndeterminada ? 'Indeterminada' : validade);
+    formData.append('imagem', imgUrl); // Certifique-se de que imgUrl é um arquivo (File)
 
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:3001/produtos/produto', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-  const handleImagePreview = () => {
-    setImgPreview(imgUrl);
+      // Resetar o formulário após o sucesso
+      setNome('');
+      setDescricao('');
+      setCategoria('');
+      setPreco('');
+      setValidade('');
+      setImgUrl(null);
+      setImgPreview(null); // Reseta o preview da imagem
+      setErro('');
+
+      // Configurar e exibir o toast
+      setToastMessage('Produto cadastrado com sucesso!');
+      setShowToast(true);
+
+      setTimeout(() => {
+        setShowToast(false); // Fechar o toast automaticamente após alguns segundos
+      }, 3000);
+    } catch (error) {
+      console.error('Erro ao cadastrar produto:', error);
+      setErro('Erro ao cadastrar produto. Tente novamente.');
+    }
   };
 
   return (
@@ -100,10 +99,7 @@ function CadastroProduto() {
             onClick={() => setShowToast(false)}
           ></button>
         </div>
-
-
       </div>
-
 
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -163,16 +159,8 @@ function CadastroProduto() {
             type="date"
             className="form-control"
             id="validade"
-            value={validadeIndeterminada ? "" : validade}
-            onChange={(e) => {
-              const inputDate = e.target.value;
-
-              const isValidDate = /^\d{4}-\d{0,2}-\d{0,2}$/.test(inputDate);
-
-              if (isValidDate) {
-                setValidade(inputDate);
-              }
-            }}
+            value={validadeIndeterminada ? '' : validade}
+            onChange={(e) => setValidade(e.target.value)}
             disabled={validadeIndeterminada}
           />
         </div>
@@ -190,32 +178,25 @@ function CadastroProduto() {
           </label>
         </div>
 
-
         <div className="mb-3">
-          <label htmlFor="imgUrl" className="form-label">Imagem (URL):</label>
-          <div className="input-group">
-            <input
-              type="text"
-              className="form-control"
-              id="imgUrl"
-              value={imgUrl}
-              onChange={(e) => setImgUrl(e.target.value)}
-              placeholder="URL da imagem"
-            />
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={handleImagePreview}
-            >
-              Visualizar
-            </button>
-          </div>
-          {imgPreview && (
-            <div className="mt-3">
-              <img src={imgPreview} alt="Preview" className="img-fluid" style={{ maxWidth: '400px', maxHeight: '400px', objectFit: 'cover' }} />
-            </div>
-          )}
+          <label htmlFor="imagem" className="form-label">Imagem:</label>
+          <input
+            type="file"
+            className="form-control"
+            id="imagem"
+            onChange={handleImageChange} // Alterado para gerenciar o preview
+          />
         </div>
+
+        {imgPreview && (
+          <div className="mb-3">
+            <img
+              src={imgPreview}
+              alt="Preview do Produto"
+              style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '8px' }}
+            />
+          </div>
+        )}
 
         <button type="submit" className="btn btn-primary w-100 btn-lg mb-4">Cadastrar Produto</button>
       </form>
