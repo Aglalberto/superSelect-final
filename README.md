@@ -8,7 +8,7 @@ The project consists in manage a list of products for vending or stocking.
 
 ## Stacks
 
-**Front-end:** ReactJS, HTML5, CSS3, Javascript
+**Front-end:** ReactJS, Bootstrap, Javascript
 
-**Back-end:** NodeJS, Express, JWT, MySQL
+**Back-end:** Javascript, NodeJS, Express, JWT, MySQL
 
